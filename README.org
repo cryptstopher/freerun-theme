@@ -1,0 +1,229 @@
+#+TITLE: Freerun
+#+AUTHOR: Chris Maiorana
+
+* A Different Way to Write Wordpress
+  :PROPERTIES:
+  :ID:       20858FE1-1449-4C43-9529-A8DC734AFA91
+  :END:
+
+This file contains individual source code blocks that, together, build
+a WordPress Theme.
+
+This is a literate programming document, which basically means that it
+is a written document with a computer program nested in its body.  The
+code snippets are extracted from this document and "tangled" together
+to build the final program.
+
+** Reproducible
+   :PROPERTIES:
+   :ID:       12E81425-6FCC-45C8-9E6F-84F0AFC76D03
+   :END:
+
+If you accidentally delete all of your theme files, or want to
+reproduce them on another workstation or WordPress site, all you need
+is the README file, and you can rebuild the theme.
+
+** Dependencies
+   :PROPERTIES:
+   :ID:       BDEE6182-BAD2-42E3-BEED-DDC22DA5475C
+   :END:
+
+In order to proceed with this project you will only need:
+
+- [[https://www.gnu.org/software/emacs/][Emacs]]
+- [[https://orgmode.org/][Org mode]]
+- [[https://github.com/emacs-php/php-mode][Php-mode]]
+
+** Installation
+   :PROPERTIES:
+   :ID:       33148055-4830-4222-A1F5-536A475E212A
+   :END:
+
+1. Install Emacs (if you haven't already)
+2. Open README.org file
+3. Type key command ~C-c C-v C-t~ to initiate the ~org-babel-tangle~
+   function
+
+(In Emacs, the "C" represent the control key on your keyboard.)
+
+* Theme Files
+  :PROPERTIES:
+  :ID:       514E10FD-CE6A-47C8-8E6F-690269FE46CE
+  :END:
+
+The "freerun" theme consists of four files:
+
+** WordPress theme boilerplate stylesheet
+   :PROPERTIES:
+   :ID:       22DF9822-021B-4CCE-B9B8-472E777C43D0
+   :HEADER-ARGS: :tangle style.css
+   :END:
+
+Every WordPress themes starts with the ~style.css~ file, containing
+the theme information:
+
+ #+BEGIN_SRC css
+   /*
+   Theme Name: freerun
+   Author: Chris M
+   Version: 1.0
+   */
+
+   body {
+       margin-left: 8%;
+       margin-right: 8%;
+   }
+
+   /*
+   #headerimg h1 {
+       font-family: fantasy;
+   }
+   #headerimg a {
+       text-decoration: none;
+       color: black;
+   }
+   #headerimg a:hover {
+       text-decoration: none;
+       color: #14cc17;
+   }
+   .description {
+       margin-top: -20px;
+   }
+   ,*/
+ #+END_SRC
+
+** Index file
+   :PROPERTIES:
+   :ID:       BFEA48FD-51CB-47D6-BC36-DE2BC6082C97
+   :HEADER-ARGS: :tangle index.php
+   :END:
+
+The ~index.php~ file uses the WordPress "loop" to cycle through
+published posts.
+
+ #+BEGIN_SRC php
+   <?php
+
+   get_header();
+
+   if (have_posts()) :
+       while (have_posts()) : the_post(); ?>
+	   <h2>&bull; <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h2>
+       <?php the_excerpt(); ?>
+
+       <?php endwhile;
+
+       else :
+	   echo '<p>No content found</p>';
+
+       endif;
+
+   get_footer();
+
+   ?>
+ #+END_SRC
+ 
+** Single post template
+   :PROPERTIES:
+   :ID:       0598719F-4E5B-44E8-8A5A-1E86EAC705AB
+   :HEADER-ARGS: :tangle single.php
+   :END:
+
+The ~single.php~ template generates content for a single post.
+
+ #+BEGIN_SRC php
+ <?php
+
+ get_header();
+
+ if (have_posts()) :
+	 while (have_posts()) : the_post(); ?>
+
+		 <h1><?php the_title(); ?></h1>
+		 (<?php the_date(); ?>)
+		 <?php the_content(); ?>
+
+	 <?php endwhile;
+
+ else :
+	 echo '<p>No content found</p>';
+
+ endif;
+
+ get_footer();
+
+ ?>
+ #+END_SRC
+
+** Page template
+   :PROPERTIES:
+   :ID:       45707431-429B-48C9-9201-2AE61564A5DE
+   :HEADER-ARGS: :tangle page.php
+   :END:
+
+The ~page.php~ file generates the content for a single page.
+
+This page template includes some special code to generate a list of
+"child" pages (if there are any).  WordPress pages are "hierarchical,"
+which means you can /nest/ pages underneath other pages.
+
+ #+BEGIN_SRC php
+ <?php
+
+ get_header();
+
+ if (have_posts()) :
+	 while (have_posts()) : the_post(); ?>
+
+		 <h1><?php the_title(); ?></h1>
+		 <?php the_content(); ?>
+
+         <!--List child pages (if there are any)-->
+
+		 <?php
+		 $children = wp_list_pages( 'title_li=&child_of='.$post->ID.'&echo=0' );
+		 if ( $children) : ?>
+			 <ul>
+				 <?php echo $children; ?>
+			 </ul>
+		 <?php endif; ?>
+
+	 <?php endwhile;
+
+ else :
+	 echo '<p>No content found</p>';
+
+ endif;
+
+ get_footer();
+
+ ?>
+ #+END_SRC
+
+* Syntax Checking Example
+  :PROPERTIES:
+  :HEADER-ARGS: :results raw
+  :ID:       DFB1183D-CC79-480B-AB1B-F14092DC77CB
+  :END:
+
+For demonstration purposes, this following code block allows for shell
+commands.  No tangle argument here, any shell commands that you run
+from here will not affect the theme files.  However, a "results"
+argument with parameter "raw" will echo the raw output in the buffer.
+
+Add [[https://phpunit.readthedocs.io/en/9.3/][PHPUnit]] to your project using Composer (may take a minute or so):
+
+#+BEGIN_SRC shell
+/usr/local/bin/composer require --dev phpunit/phpunit ^9
+#+END_SRC
+
+#+RESULTS:
+
+Get the version:
+
+#+BEGIN_SRC shell
+./vendor/bin/phpunit --version
+#+END_SRC
+
+#+RESULTS:
+PHPUnit 9.3.7 by Sebastian Bergmann and contributors.
