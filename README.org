@@ -200,7 +200,7 @@ which means you can /nest/ pages underneath other pages.
  ?>
  #+END_SRC
 
-* Syntax Checking Example
+* Shell Code Examples
   :PROPERTIES:
   :HEADER-ARGS: :results raw
   :ID:       DFB1183D-CC79-480B-AB1B-F14092DC77CB
